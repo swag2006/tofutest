@@ -16,6 +16,15 @@ resource "aws_lambda_function" "processor" {
     }
   }
   lifecycle { ignore_changes = [filename, source_code_hash] }
+
+  precondition {
+    condition     = var.create_lambda_role || length(var.existing_lambda_role_name) > 0
+    error_message = "existing_lambda_role_name must be provided when create_lambda_role is false."
+  }
+  precondition {
+    condition     = var.create_dynamodb_table || (length(var.existing_dynamodb_table_name) > 0 && length(var.existing_dynamodb_table_arn) > 0)
+    error_message = "existing_dynamodb_table_name and existing_dynamodb_table_arn must be provided when create_dynamodb_table is false."
+  }
 }
 
 resource "aws_cloudwatch_log_group" "lambda_logs" {
@@ -43,4 +52,3 @@ resource "aws_s3_bucket_notification" "media_events" {
   }
   depends_on = [aws_lambda_permission.allow_s3]
 }
-

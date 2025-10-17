@@ -25,3 +25,6 @@ output "aws_region" { value = var.aws_region }
 output "aws_account_id" { value = data.aws_caller_identity.current.account_id }
 output "ecr_repository_name" { value = length(aws_ecr_repository.api) > 0 ? aws_ecr_repository.api[0].name : "" }
 output "adapter_type" { value = var.adapter_type }
+output "project_name" { value = var.project_name }
+output "environment" { value = var.environment }
+output "apprunner_image_tag" { value = var.apprunner_image_tag }

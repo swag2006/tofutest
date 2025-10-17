@@ -73,10 +73,7 @@ variable "existing_s3_bucket_name" {
   type        = string
   description = "Existing S3 bucket name when create_s3_bucket=false."
   default     = ""
-  validation {
-    condition     = var.create_s3_bucket || length(var.existing_s3_bucket_name) > 0
-    error_message = "existing_s3_bucket_name must be set when create_s3_bucket is false"
-  }
+  # Validation removed (cannot reference other variables). Provide value when create_s3_bucket=false.
 }
 
 variable "create_lambda_role" {
@@ -89,10 +86,7 @@ variable "existing_lambda_role_name" {
   type        = string
   description = "Existing Lambda role name when create_lambda_role=false."
   default     = ""
-  validation {
-    condition     = var.create_lambda_role || length(var.existing_lambda_role_name) > 0
-    error_message = "existing_lambda_role_name must be set when create_lambda_role is false"
-  }
+  # Provide value when create_lambda_role=false.
 }
 
 variable "create_apprunner_roles" {
@@ -105,20 +99,14 @@ variable "existing_apprunner_role_name" {
   type        = string
   description = "Existing App Runner service role name when create_apprunner_roles=false."
   default     = ""
-  validation {
-    condition     = var.create_apprunner_roles || length(var.existing_apprunner_role_name) > 0
-    error_message = "existing_apprunner_role_name must be set when create_apprunner_roles is false"
-  }
+  # Provide value when create_apprunner_roles=false.
 }
 
 variable "existing_apprunner_ecr_access_role_name" {
   type        = string
   description = "Existing App Runner ECR access role name when create_apprunner_roles=false."
   default     = ""
-  validation {
-    condition     = var.create_apprunner_roles || length(var.existing_apprunner_ecr_access_role_name) > 0
-    error_message = "existing_apprunner_ecr_access_role_name must be set when create_apprunner_roles is false"
-  }
+  # Provide value when create_apprunner_roles=false.
 }
 
 variable "create_ecr_repo" {
@@ -129,12 +117,9 @@ variable "create_ecr_repo" {
 
 variable "existing_ecr_repository_url" {
   type        = string
-  description = "Existing ECR repository URL (e.g. account.dkr.ecr.region.amazonaws.com/repo) when create_ecr_repo=false."
+  description = "Existing ECR repository URL when create_ecr_repo=false."
   default     = ""
-  validation {
-    condition     = var.create_ecr_repo || length(var.existing_ecr_repository_url) > 0
-    error_message = "existing_ecr_repository_url must be set when create_ecr_repo is false"
-  }
+  # Provide value when create_ecr_repo=false.
 }
 
 variable "create_apprunner_service" {
@@ -153,20 +138,14 @@ variable "existing_dynamodb_table_name" {
   type        = string
   description = "Existing DynamoDB table name when create_dynamodb_table=false."
   default     = ""
-  validation {
-    condition     = var.create_dynamodb_table || length(var.existing_dynamodb_table_name) > 0
-    error_message = "existing_dynamodb_table_name must be set when create_dynamodb_table is false"
-  }
+  # Provide value when create_dynamodb_table=false.
 }
 
 variable "existing_dynamodb_table_arn" {
   type        = string
   description = "Existing DynamoDB table ARN when create_dynamodb_table=false."
   default     = ""
-  validation {
-    condition     = var.create_dynamodb_table || length(var.existing_dynamodb_table_arn) > 0
-    error_message = "existing_dynamodb_table_arn must be set when create_dynamodb_table is false"
-  }
+  # Provide value when create_dynamodb_table=false.
 }
 
 variable "apprunner_image_tag" {
