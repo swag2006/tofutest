@@ -1,81 +1,77 @@
+```markdown
+# Quick Start
 ```shell
 git clone https://github.com/swag2006/tofutest.git
 cd tofutest
 
-# (Optional) create a tfvars file to override defaults
+# (Optional) variable overrides
 cat > dev.auto.tfvars <<'EOF'
 aws_region = "us-east-1"
 deploy_api = true
+apprunner_image_tag = "latest"
 EOF
 
-# Initialize (downloads providers & sets up backend)
+# Create placeholder lambda zip (first deploy)
+chmod +x scripts/create_placeholder_lambda_zip.sh
+scripts/create_placeholder_lambda_zip.sh
+
+# Init & deploy
 tofu init
-
-# Review the execution plan
 tofu plan
-
-# Apply infrastructure
 tofu apply -auto-approve
 
-# Show post-deployment instructions output (if deploy_api=true)
-tofu output instructions
-```
-
-Variables:
-- deploy_api (bool): Controls whether instruction output is populated. Default: true.
-- aws_region (string): AWS region for resources. Default: us-east-1.
-
-Additional Variables (conditional creation):
-- create_s3_bucket (bool, default true)
-- existing_s3_bucket_name (string) when create_s3_bucket=false
-- create_lambda_role (bool, default true)
-- existing_lambda_role_name (string) when create_lambda_role=false
-- create_apprunner_roles (bool, default true)
-- existing_apprunner_role_name (string) when create_apprunner_roles=false
-- existing_apprunner_ecr_access_role_name (string) when create_apprunner_roles=false
-- create_ecr_repo (bool, default true)
-- create_apprunner_service (bool, default true; requires deploy_api=true)
-- existing_ecr_repository_url (string) when create_ecr_repo=false
-
-Using existing resources instead of creating new ones:
-1. Set the corresponding create_* variable to false.
-2. Provide the existing_* name variable.
-3. Run: `tofu plan` to confirm no create attempts for those resources.
-
-Example dev.auto.tfvars snippet for existing bucket & roles:
-```hcl
-create_s3_bucket = false
-existing_s3_bucket_name = "vehicle-assessment-dev-082608134871"
-create_lambda_role = false
-existing_lambda_role_name = "vehicle-assessment-lambda-dev"
-create_apprunner_roles = false
-existing_apprunner_role_name = "vehicle-assessment-apprunner-dev"
-existing_apprunner_ecr_access_role_name = "vehicle-assessment-apprunner-ecr-dev"
-```
-
-Importing existing resources (alternative to flags):
-If you prefer to keep create_* = true and adopt into state, import before apply:
-```shell
-tofu import aws_s3_bucket.media[0] vehicle-assessment-dev-082608134871
-tofu import aws_iam_role.lambda_role[0] vehicle-assessment-lambda-dev
-tofu import aws_iam_role.apprunner_role[0] vehicle-assessment-apprunner-dev
-tofu import aws_iam_role.apprunner_ecr_access[0] vehicle-assessment-apprunner-ecr-dev
-```
-(Adjust names to match the actual existing resources.)
-
-Outputs of interest:
-```shell
+# Outputs
 tofu output bucket_name
-tofu output lambda_role_name
-tofu output apprunner_service_url
+tofu output dynamodb_table_name
+tofu output lambda_function_name
 ```
 
-Next Steps:
-1. Add resource files (e.g., s3.tf, dynamodb.tf, lambda.tf, ecr.tf, apprunner.tf) defining actual AWS resources.
-2. Update output in `outputs.tf` to reference real resource attributes once created.
-3. Re-run `tofu plan` and `tofu apply` to deploy new resources.
+## Build & Push API Image (ECR + App Runner)
+```shell
+chmod +x scripts/build_push_ecr.sh
+scripts/build_push_ecr.sh $(tofu output -raw ecr_repository_url) $(tofu output -raw apprunner_image_tag) api
+# Update image tag variable if you pushed a new tag
+```
 
-Tips:
-- Use `tofu fmt` to format code.
-- Use `tofu validate` for static validation before planning.
-- Keep `.terraform.lock.hcl` committed for provider version pinning.
+## Update Lambda Code
+```shell
+chmod +x scripts/deploy_lambda.sh
+scripts/deploy_lambda.sh $(tofu output -raw lambda_function_name) lambda_src
+```
+
+## Key Outputs
+- bucket_name
+- dynamodb_table_name / dynamodb_table_arn
+- lambda_function_name
+- ecr_repository_url / ecr_repository_name
+- apprunner_service_url
+- aws_account_id / aws_region
+
+## Variables (Core)
+- project_name, environment, aws_region, deploy_api
+- adapter_type, openai_api_key (sensitive)
+- lambda_timeout_seconds, lambda_memory_mb
+- api_cpu, api_memory_mb, apprunner_image_tag
+
+## Conditional Creation Flags
+create_s3_bucket, create_dynamodb_table, create_lambda_role, create_apprunner_roles, create_ecr_repo, create_apprunner_service
+Provide existing_* vars when flag is false.
+
+## Existing Resource Imports (alternative)
+```shell
+tofu import aws_s3_bucket.media[0] <bucket>
+tofu import aws_iam_role.lambda_role[0] <lambda_role>
+tofu import aws_iam_role.apprunner_role[0] <apprunner_role>
+```
+
+## Directory Layout
+- api/ (FastAPI container for App Runner)
+- lambda_src/ (Lambda placeholder code)
+- scripts/ (deployment helpers)
+- *.tf modular files (per component)
+
+## Next Steps
+- Add remote state backend
+- Add alarms/monitoring
+- Harden IAM policies further
+- Add automated CI (fmt, validate, plan) pipeline

@@ -142,3 +142,35 @@ variable "create_apprunner_service" {
   description = "Whether to create App Runner service (also requires deploy_api=true)."
   default     = true
 }
+
+variable "create_dynamodb_table" {
+  type        = bool
+  description = "Whether to create the DynamoDB table."
+  default     = true
+}
+
+variable "existing_dynamodb_table_name" {
+  type        = string
+  description = "Existing DynamoDB table name when create_dynamodb_table=false."
+  default     = ""
+  validation {
+    condition     = var.create_dynamodb_table || length(var.existing_dynamodb_table_name) > 0
+    error_message = "existing_dynamodb_table_name must be set when create_dynamodb_table is false"
+  }
+}
+
+variable "existing_dynamodb_table_arn" {
+  type        = string
+  description = "Existing DynamoDB table ARN when create_dynamodb_table=false."
+  default     = ""
+  validation {
+    condition     = var.create_dynamodb_table || length(var.existing_dynamodb_table_arn) > 0
+    error_message = "existing_dynamodb_table_arn must be set when create_dynamodb_table is false"
+  }
+}
+
+variable "apprunner_image_tag" {
+  type        = string
+  description = "Docker image tag for App Runner service (defaults to 'latest')."
+  default     = "latest"
+}

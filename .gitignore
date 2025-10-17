@@ -51,3 +51,6 @@ venv/
 # Lock files to KEEP (do NOT ignore):
 # .terraform.lock.hcl
 
+# Build artifacts and deployment package for Lambda
+build/
+deployment.zip
