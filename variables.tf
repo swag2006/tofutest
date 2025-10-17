@@ -62,3 +62,83 @@ variable "api_memory_mb" {
   description = "App Runner instance memory (e.g. '2 GB')."
   default     = "2 GB"
 }
+
+variable "create_s3_bucket" {
+  type        = bool
+  description = "Whether to create the S3 bucket. Set false to use an existing bucket name."
+  default     = true
+}
+
+variable "existing_s3_bucket_name" {
+  type        = string
+  description = "Existing S3 bucket name when create_s3_bucket=false."
+  default     = ""
+  validation {
+    condition     = var.create_s3_bucket || length(var.existing_s3_bucket_name) > 0
+    error_message = "existing_s3_bucket_name must be set when create_s3_bucket is false"
+  }
+}
+
+variable "create_lambda_role" {
+  type        = bool
+  description = "Create Lambda IAM role. Set false to use an existing role name."
+  default     = true
+}
+
+variable "existing_lambda_role_name" {
+  type        = string
+  description = "Existing Lambda role name when create_lambda_role=false."
+  default     = ""
+  validation {
+    condition     = var.create_lambda_role || length(var.existing_lambda_role_name) > 0
+    error_message = "existing_lambda_role_name must be set when create_lambda_role is false"
+  }
+}
+
+variable "create_apprunner_roles" {
+  type        = bool
+  description = "Create App Runner service and ECR access roles. Set false to use existing role names."
+  default     = true
+}
+
+variable "existing_apprunner_role_name" {
+  type        = string
+  description = "Existing App Runner service role name when create_apprunner_roles=false."
+  default     = ""
+  validation {
+    condition     = var.create_apprunner_roles || length(var.existing_apprunner_role_name) > 0
+    error_message = "existing_apprunner_role_name must be set when create_apprunner_roles is false"
+  }
+}
+
+variable "existing_apprunner_ecr_access_role_name" {
+  type        = string
+  description = "Existing App Runner ECR access role name when create_apprunner_roles=false."
+  default     = ""
+  validation {
+    condition     = var.create_apprunner_roles || length(var.existing_apprunner_ecr_access_role_name) > 0
+    error_message = "existing_apprunner_ecr_access_role_name must be set when create_apprunner_roles is false"
+  }
+}
+
+variable "create_ecr_repo" {
+  type        = bool
+  description = "Whether to create ECR repository."
+  default     = true
+}
+
+variable "existing_ecr_repository_url" {
+  type        = string
+  description = "Existing ECR repository URL (e.g. account.dkr.ecr.region.amazonaws.com/repo) when create_ecr_repo=false."
+  default     = ""
+  validation {
+    condition     = var.create_ecr_repo || length(var.existing_ecr_repository_url) > 0
+    error_message = "existing_ecr_repository_url must be set when create_ecr_repo is false"
+  }
+}
+
+variable "create_apprunner_service" {
+  type        = bool
+  description = "Whether to create App Runner service (also requires deploy_api=true)."
+  default     = true
+}
