@@ -31,16 +31,18 @@ resource "aws_apprunner_service" "api" {
     healthy_threshold   = 1
     unhealthy_threshold = 3
   }
-  precondition {
-    condition     = !((var.deploy_api && var.create_apprunner_service) && !var.create_apprunner_roles && (length(var.existing_apprunner_role_name) == 0 || length(var.existing_apprunner_ecr_access_role_name) == 0))
-    error_message = "existing_apprunner_role_name and existing_apprunner_ecr_access_role_name must be provided when create_apprunner_roles=false and App Runner service enabled."
-  }
-  precondition {
-    condition     = !((var.deploy_api && var.create_apprunner_service) && !var.create_ecr_repo && length(var.existing_ecr_repository_url) == 0)
-    error_message = "existing_ecr_repository_url must be provided when create_ecr_repo=false and App Runner service enabled."
-  }
-  precondition {
-    condition     = var.create_dynamodb_table || (length(var.existing_dynamodb_table_name) > 0 && length(var.existing_dynamodb_table_arn) > 0)
-    error_message = "existing_dynamodb_table_name and existing_dynamodb_table_arn must be provided when create_dynamodb_table=false."
+  lifecycle {
+    precondition {
+      condition     = local.apprunner_role_arn != "" && local.apprunner_ecr_access_role_arn != ""
+      error_message = "App Runner roles must exist (create_apprunner_roles=true or supply existing_apprunner_role_name & existing_apprunner_ecr_access_role_name)."
+    }
+    precondition {
+      condition     = local.ecr_repository_url != ""
+      error_message = "ECR repository URL must be provided (create_ecr_repo=true or supply existing_ecr_repository_url)."
+    }
+    precondition {
+      condition     = local.dynamodb_table_name != "" && local.dynamodb_table_arn != ""
+      error_message = "DynamoDB table must exist for App Runner environment variables."
+    }
   }
 }

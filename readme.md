@@ -16,6 +16,12 @@ cd tofutest
 cat > dev.auto.tfvars <<'EOF'
 aws_region = "us-east-2"
 deploy_api = true
+create_s3_bucket = true
+create_dynamodb_table = true
+create_lambda_role = true
+create_apprunner_roles = true
+create_ecr_repo = true
+create_apprunner_service = true
 apprunner_image_tag = "latest"
 EOF
 
